@@ -43,7 +43,7 @@ def send():
                 if cmd == 'w': move = "5"
                 elif cmd == 's': move = "-5"
                 elif cmd == 'd': turn = "-5"
-                elif cmd ==' a': turn = "5"
+                elif cmd == 'a': turn = "5"
                 jsonOut = "{\"move\":\"" + move + "\", \"turn\":\"" + turn + "\"}"
                 print(jsonOut)
                 sendlength = c.send(jsonOut.encode()) # Client sends time to server
