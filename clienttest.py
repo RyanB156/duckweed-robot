@@ -36,7 +36,17 @@ def send():
         
         while True:
             userIn = input("Give command to robot: ")
-            sendlength = c.send(userIn.encode()) # Client sends time to server
+            for cmd in userIn:
+                move = "0"
+                turn = "0"
+                
+                if cmd == 'w': move = "5"
+                elif cmd == 's': move = "-5"
+                elif cmd == 'd': turn = "-5"
+                elif cmd ==' a': turn = "5"
+                jsonOut = "{\"move\":\"" + move + "\", \"turn\":\"" + turn + "\"}"
+                print(jsonOut)
+                sendlength = c.send(jsonOut.encode()) # Client sends time to server
         c.close()
         
 sender = threading.Thread(target=send, args=())
