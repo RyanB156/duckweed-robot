@@ -33,7 +33,17 @@ class State:
     def turn(self, amount):
         self.heading += amount
     def getStateString(self):
-        return "{position: " + str(self.x) + "," + str(self.y) + ", heading: " +str(self.heading) + "}"
+        dict = { 
+            "timestamp": str(time.ctime()),
+            "position_x": str(self.x),
+            "position_y": str(self.y),
+            "heading": str(self.heading),
+        }
+        s = "{"
+        for key in dict:
+            s += "\"" + key + "\":\"" + str(dict[key]) + "\", "
+        s += "}"
+        return s
 
 
 def handler(signal_received, frame):
@@ -51,6 +61,7 @@ def send():
         
         # Wait for connection to be established with s1. Then the client has also opened a socket to connect to.
         #s2.connect(('127.0.0.1', rport))
+        time.sleep(1)
         receiver.start()
         print("socket2 connected to {0}".format(rport))
         
@@ -60,9 +71,11 @@ def send():
         c.close()
         
 def recv():
-    s2.connect(('127.0.0.1', rport))
+    while s2.connect_ex(('127.0.0.1', rport)) != 0:
+        time.sleep(1)
     while True:
-        data = s2.recv(1024).decode('utf-8').strip('\x00')
+        i = s2.recv(1024)
+        data = i.decode('utf-8').strip('\x00')
         j = json.loads(data)
         state.move(int(j["move"])) # Read move amount from json
         state.turn(int(j["turn"])) # Read turn amount from json
@@ -74,6 +87,3 @@ sender = threading.Thread(target=send, args=())
 receiver = threading.Thread(target=recv, args=())
 sender.start()
 
-    
-    
-    
