@@ -1,11 +1,12 @@
-import socket
+import json
+import math
+from queue import Queue
+import random
 from signal import signal, SIGINT
+import socket
 from sys import exit
 import time
 import threading
-import math
-import json
-from queue import Queue
 
 class Comm:
     def __init__(self, send_port, recv_port):
@@ -72,19 +73,29 @@ class Robot:
         self.x = x
         self.y = y
         self.heading = heading
+        self.weed_volume = 0
         self.communicator = Comm(12345, 12346)
         self.start()
         
     def start(self):
         while True:
             while self.communicator.has_read_data():
-                cmd = self.communicator.read() # cmd will be a JSON object from the controller.
+                data = self.communicator.read() # cmd will be a JSON object from the controller.
+                cmd = json.loads(data)
                 self.process(cmd)
+                
+            weeds = random.randrange(5)
+            self.weed_volume += weeds
+            print("Robot collected {0}".format(weeds))
+                
             self.communicator.send(self.get_state_string())
             time.sleep(2)
             
+    # cmd is a JSON string.
     def process(self, cmd):
         print("Processing {0}".format(cmd))
+        self.move(int(cmd["move"])) # Read move amount from json
+        self.turn(int(cmd["turn"])) # Read turn amount from json
             
     def move(self, amount):
         radHeading = self.heading * math.pi / 180
@@ -100,10 +111,12 @@ class Robot:
             "position_x": str(self.x),
             "position_y": str(self.y),
             "heading": str(self.heading),
+            "weeds": str(self.weed_volume),
         }
         s = "{"
         for key in dict:
             s += "\"" + key + "\":\"" + str(dict[key]) + "\", "
+        s = s[:-2]
         s += "}"
         return s
         
