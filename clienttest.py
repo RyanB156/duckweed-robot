@@ -1,3 +1,4 @@
+import json
 import socket
 from signal import signal, SIGINT
 from sys import exit
@@ -26,7 +27,12 @@ signal(SIGINT, handler)
 
 def recv():
     while True:
-        print(s1.recv(1024))
+        i = s1.recv(1024)
+        print(i)
+        data = i.decode('utf-8').strip('\x00')
+        j = json.loads(data)
+        if (int(j["weeds"]) >= 100):
+            print("ALERT: Weed collector is full")
         
         
 def send():
@@ -47,6 +53,7 @@ def send():
                 jsonOut = "{\"move\":\"" + move + "\", \"turn\":\"" + turn + "\"}"
                 print(jsonOut)
                 sendlength = c.send(jsonOut.encode()) # Client sends time to server
+                time.sleep(0.020)
         c.close()
         
 sender = threading.Thread(target=send, args=())
