@@ -12,6 +12,7 @@ class Comm:
         self.conn = socket.socket()
         self.send_port = send_port
         self.recv_port = recv_port
+        self.recv_ip = ''                                                                           # IP address that the receiver thread will listen to.
         self.recv_thread = threading.Thread(target=self.receive, args=())
         self.read_queue = Queue()
         
@@ -24,7 +25,9 @@ class Comm:
         print("socket is listening")
         
         self.conn, addr = self.send_socket.accept() # Need a way to retry the connection if self.conn closes.
-        print("got connection from {0}".format(addr))
+        print("Got connection from {0}".format(addr))
+        self.recv_ip, p = addr
+        
         time.sleep(1)
         self.recv_thread.start()
         
@@ -33,7 +36,7 @@ class Comm:
         
     # Threaded method to listen to data on recv_socket. Read any data to read_queue.
     def receive(self):
-        while self.recv_socket.connect_ex(('', self.recv_port)) != 0: # Try to connect until a connection is established.
+        while self.recv_socket.connect_ex((self.recv_ip, self.recv_port)) != 0: # Try to connect until a connection is established.
             time.sleep(1)
         while True:
             i = self.recv_socket.recv(1024)
