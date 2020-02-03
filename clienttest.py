@@ -13,7 +13,7 @@ sport = 12346
 
 display_map = False
 
-s1.connect(('127.0.0.1', rport))
+s1.connect(('', rport))
 print("socket1 connected to {0}".format(rport))
 s2.bind(('', sport))
 print("socket1 bound to {0}".format(sport))

@@ -33,7 +33,7 @@ class Comm:
         
     # Threaded method to listen to data on recv_socket. Read any data to read_queue.
     def receive(self):
-        while self.recv_socket.connect_ex(('127.0.0.1', self.recv_port)) != 0: # Try to connect until a connection is established.
+        while self.recv_socket.connect_ex(('', self.recv_port)) != 0: # Try to connect until a connection is established.
             time.sleep(1)
         while True:
             i = self.recv_socket.recv(1024)
