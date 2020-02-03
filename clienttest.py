@@ -2,27 +2,22 @@ import json
 import socket
 from signal import signal, SIGINT
 from sys import exit
+import sys
 import time
 import threading
 
-s1 = socket.socket()
-s2 = socket.socket()
+recv_socket = socket.socket()
+send_socket = socket.socket()
 
 rport = 12345
 sport = 12346
 
 display_map = False
 
-s1.connect(('', rport))
-print("socket1 connected to {0}".format(rport))
-s2.bind(('', sport))
-print("socket1 bound to {0}".format(sport))
-s2.listen(5)
-
 def handler(signal_received, frame):
     print("CTRL-C detected")
-    s1.close()
-    s2.close()
+    recv_socket.close()
+    send_socket.close()
     exit(0)
 
 signal(SIGINT, handler)
@@ -40,7 +35,7 @@ def recv():
             print()
     
     while True:
-        i = s1.recv(1024)
+        i = recv_socket.recv(1024)
         print(i)
         data = i.decode('utf-8').strip('\x00')
         j = json.loads(data)
@@ -66,7 +61,7 @@ def recv():
         
 def send():
     while True:
-        c, addr = s2.accept()
+        c, addr = send_socket.accept()
         print("got connection from {0}".format(addr))
         
         while True:
@@ -98,8 +93,23 @@ def send():
                 time.sleep(0.020)
         c.close()
         
-sender = threading.Thread(target=send, args=())
-receiver = threading.Thread(target=recv, args=())
-sender.start()
-receiver.start()
+
+if __name__ == "__main__":
+
+    if len(sys.argv) == 2:
+        recv_socket.connect((sys.argv[1], rport))
+    else:
+        print("Usage: python3 clienttest.py <IP address or \"localhost\">")
+        sys.exit(1)
+        
+    print("socket1 connected to {0}".format(rport))
+    send_socket.bind(('', sport))
+    print("socket1 bound to {0}".format(sport))
+    send_socket.listen(5)
+
+    sender = threading.Thread(target=send, args=())
+    receiver = threading.Thread(target=recv, args=())
+    sender.start()
+    receiver.start()
+    
 
