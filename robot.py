@@ -39,10 +39,25 @@ class Robot:
     # cmd is a JSON string.
     def process(self, cmd):
         print("Processing {0}".format(cmd))
-        self.move(int(cmd["move"])) # Read move amount from json
-        self.turn(int(cmd["turn"])) # Read turn amount from json
-        self.manual_control = cmd["ctrl"] == "manual"
-        if cmd["ctrl"] == "auto": print("Setting autonomous control")
+        
+        # Receive message to change control type
+        if cmd["type"] == "mode_msg":
+        
+            if cmd["mode"] == "manual":
+                print("Setting manual control mode")
+                self.manual_control = True
+            elif cmd["mode"] == "auto":
+                print("Setting autonomous control mode")
+                self.manual_control = False
+            else: print("Unsupported control mode")
+            
+        # Receive message to apply manual controls
+        elif cmd["type"] == "ctrl_msg":
+            self.move(int(cmd["move"])) # Read move amount from json
+            self.turn(int(cmd["turn"])) # Read turn amount from json
+        
+        else:
+            print("Unsupported message type")
     
     # Move the robot around autonomously
     def auto(self):
@@ -50,6 +65,10 @@ class Robot:
             dir = 1 if random.randrange(2) == 1 else -1 # + left, - right
             self.turn(self.auto_turn_amount * dir)
         self.move(self.auto_move_amount)
+        
+        self.fix_collision()
+        
+    def fix_collision(self):
         # Keep reversing and turning until the robot is free
         while self.detect_collision():
             self.move(-self.auto_move_amount)

@@ -66,22 +66,31 @@ def send():
         
         while True:
             userIn = input("Give command to robot: ")
+            
             for cmd in userIn:
-                move = "0"
-                turn = "0"
-                ctrl = "manual"
-                
-                if cmd == 'w': move = "5"
-                elif cmd == 's': move = "-5"
-                elif cmd == 'd': turn = "-5"
-                elif cmd == 'a': turn = "5"
-                elif cmd == 'c': ctrl = "auto"
-                
-                dict = { 
-                "move": move,
-                "turn": turn,
-                "ctrl": ctrl,
-                }
+            
+                if cmd == 'c' or cmd == 'm':
+                    mode = "auto" if cmd == 'c' else "manual"
+                    dict = {
+                        "type": "mode_msg",
+                        "mode": mode,
+                    }
+                else:
+                    
+                    move = "0"
+                    turn = "0"
+                    
+                    if cmd == 'w': move = "5"
+                    elif cmd == 's': move = "-5"
+                    elif cmd == 'd': turn = "-5"
+                    elif cmd == 'a': turn = "5"
+                    
+                    dict = { 
+                    "type": "ctrl_msg",
+                    "move": move,
+                    "turn": turn,
+                    }
+                        
                 s = "{"
                 for key in dict:
                     s += "\"" + key + "\":\"" + str(dict[key]) + "\", "
