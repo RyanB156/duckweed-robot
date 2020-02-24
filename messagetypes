@@ -1,0 +1,10 @@
+{
+	"type": "mode_msg",
+	"mode": mode,
+}
+                        
+{ 
+	"type": "ctrl_msg",
+	"move": move,
+	"turn": turn,
+}
